@@ -18,7 +18,9 @@ add_executable(${PROJECT_NAME}
 				src/world/World.hpp
 				src/world/World.cpp	
 				src/world/Cell.hpp
-				src/world/Cell.cpp			
+				src/world/Cell.cpp	
+				src/world/Organella.hpp
+				src/world/Organella.cpp		
 				src/math/math.hpp
 				src/math/math.cpp
 				)

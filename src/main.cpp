@@ -5,9 +5,11 @@
 #include "Screen.hpp"
 #include "world/World.hpp"
 
+World* world;
+
 int main()
 {
-    World* world = new World(80, 60);
+    world = new World(80, 50);
     
     Screen* screen = new Screen(world, 20);
     sf::RenderWindow* window = screen->get_window();

@@ -19,12 +19,17 @@ private:
 	Vect inm(const Vect&);
 
 	void update_using_map();
-
+	// ONLY FOR MOVEING, NOT _ENERGY!!!!!!!!
 	void bot_move(Life_Cell* bot);
+	// return position on free place aroun bot, else return bot position
+	Vect bot_free_around_position(Life_Cell* bot);
 public:
 	World(int sx, int sy);
 
 	void update();
+
+	Cell_I* map_get_cell(int x, int y);
+	int map_get_light_power(int x, int y);
 
 	Vect get_size();
 	std::vector<std::vector<Cell_I*>>& get_map();

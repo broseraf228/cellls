@@ -31,6 +31,9 @@ Vect Vect::operator+(const Vect& vect) {
 Vect Vect::operator-(const Vect& vect) {
 	return Vect(x - vect.x, y - vect.y);
 }
+bool Vect::operator==(const Vect& v){
+	return x == v.x && y == v.y;
+}
 const Vect& Vect::normolize() {
 	x = x > 0.5 ? 1 : 0;
 	y = y > 0.5 ? 1 : 0;

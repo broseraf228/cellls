@@ -15,6 +15,7 @@ public:
 	Vect operator-(const Vect&);
 	Vect operator*(int);
 	Vect operator/(int);
+	bool operator==(const Vect&);
 
 	const Vect& normolize();
 	static Vect get_default();
