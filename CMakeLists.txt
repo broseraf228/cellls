@@ -15,8 +15,12 @@ add_executable(${PROJECT_NAME}
 				src/main.cpp
 				src/Screen.hpp
 				src/Screen.cpp
-				src/World.hpp
-				src/World.cpp				
+				src/world/World.hpp
+				src/world/World.cpp	
+				src/world/Cell.hpp
+				src/world/Cell.cpp			
+				src/math/math.hpp
+				src/math/math.cpp
 				)
 				
 target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics)

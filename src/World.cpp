@@ -1,9 +1,11 @@
 #include "World.hpp"
 
-World::World(float size) : size{size} {
+World::World(int sx, int sy){
+	size = Vect(sx, sy);
 
+	map = std::vector(sx, std::vector(sy, nullptr));
 }
 
-float World::get_size() {
+Vect World::get_size() {
 	return size;
 }

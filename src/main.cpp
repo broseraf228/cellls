@@ -1,14 +1,15 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "math/math.hpp"
 #include "Screen.hpp"
-#include "World.hpp"
+#include "world/World.hpp"
 
 int main()
 {
-    World* world = new World(500);
+    World* world = new World(80, 60);
     
-    Screen* screen = new Screen(world->get_size(), 1);
+    Screen* screen = new Screen(world, 20);
     sf::RenderWindow* window = screen->get_window();
 
     while (window->isOpen())
@@ -21,6 +22,7 @@ int main()
             }
         }
 
+        world->update();
         screen->draw();
     }
 }
