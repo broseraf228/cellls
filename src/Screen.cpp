@@ -8,7 +8,7 @@ Screen::Screen(World* world, int one_cell_size){
 	world_size = world->get_size();
 	cell_size = one_cell_size;
 	window.create( sf::VideoMode( world_size.x * one_cell_size, world_size.y * one_cell_size ), "CELLLS" );
-	window.setFramerateLimit(200);
+	window.setFramerateLimit(2000);
 
 	world_grid.setPrimitiveType(sf::Lines);
 	for (int x = 0; x < world_size.x; x++) {
@@ -67,13 +67,12 @@ void Screen::draw_world() {
 			if (item->energy > max_energy) max_energy = item->energy;
 		float rev_max_energy = 1.0 / max_energy;
 
+		sf::Color col;
 		for (int y = 0; y < world_size.y; y++)
 			for (int x = 0; x < world_size.x; x++) {
 				if (map[x][y]->type() == CELLS::sub) {
-					if(map[x][y]->get_solid())
-						draw_cell(x, y, sf::Color(50,50,50,255));
-					else
-						draw_cell(x, y, sf::Color(150, 150, 150, 255));
+					col = map[x][y]->get_color(); col.a = 150;
+					draw_cell(x, y, col);
 					continue;
 				}
 				else if (map[x][y]->type() == CELLS::bot) {

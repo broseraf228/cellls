@@ -62,6 +62,7 @@ public:
 
 	int energy{ 0 };
 	int age{ 0 };
+	int minerale{ 0 };
 	char genome[64];
 	int command_counter{ 0 };
 	inline int current_command();

@@ -12,9 +12,9 @@ World* world;
 int main()
 {
     srand(time(NULL));
-    world = new World(180, 90);
+    world = new World(120, 60);
     
-    Screen* screen = new Screen(world, 10); screen->set_mode(DISPLAY_MODE::real_color);
+    Screen* screen = new Screen(world, 13); screen->set_mode(DISPLAY_MODE::real_color);
 
     sf::RenderWindow* window = screen->get_window();
 

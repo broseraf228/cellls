@@ -15,8 +15,8 @@ World::World(int sx, int sy){
 	for(int x = 0; x < sx; x++)
 		for (int y = 0; y < sy; y++)
 		{
-			if (((float)y - rand() % (y+1) * 2) / sy > 0.5)
-				world[x][y] = new Substance_Cell(substance(rand() % 100, rand() % 100, rand() % 100));
+			if (((float)y - rand() % (y+1) * 2) / sy > 0.8)
+				world[x][y] = new Substance_Cell(substance(rand() % 10, rand() % 10, rand() % 100));
 			else
 				world[x][y] = new Substance_Cell(substance(0, 0, 0));
 		}
@@ -75,7 +75,7 @@ Substance_Cell* World::map_get_world_cell(int x, int y) {
 	return world[x][y];
 }
 int World::map_get_light_power(int x, int y) {
-	int res = round((size.y - y) / 10) - 4;
+	int res = round((size.y - y) / 10) - size.y / 20;
 	if (res < 0)
 		return 0;
 	return res + 8;
@@ -107,7 +107,7 @@ void World::update() {
 		bot = bots[i];
 
 		bot->age++;
-		bot->energy -= 1 + bot->age * 0.005;
+		bot->energy -= 1;
 
 		if (bot->energy <= 100) {
 			world[bot->position.x][bot->position.y]->add(substance(0, 1, 0));
@@ -127,7 +127,11 @@ void World::update() {
 	{
 		for (int x = 0; x < size.x; x++) {
 			for (int y = size.y - 1; y > 1; y--) {
-				if (world[x][y - 1]->get_substance().organic >= 25 && world[x][y]->get_substance().organic < 100 && map[x][y]->type() == CELLS::sub)
+				if (map[x][y]->type() == CELLS::sub && world[x][y - 1]->get_substance().organic >= 25 
+					&& world[x][y]->get_substance().protein < 50
+					&& world[x][y]->get_substance().organic < 100
+					&& world[x][y]->get_substance().mineral < 50
+					)
 				{
 					world[x][y]->get_substance().organic += 25;
 					world[x][y - 1]->get_substance().organic -= 25;
@@ -137,8 +141,10 @@ void World::update() {
 	}
 	for (int x = 0; x < size.x; x++) {
 		for (int y = 0; y < size.y; y++) {
-			if(world[x][y]->get_substance().organic > 50 && rand() % 3 == 0)
-				world[x][y]->get_substance().organic--;
+			if (world[x][y]->get_substance().organic > 57 && rand() % 10 == 0) {
+				world[x][y]->get_substance().organic -= 7;
+				world[x][y]->get_substance().mineral++;
+			}
 		}
 	}
 	update_using_map();

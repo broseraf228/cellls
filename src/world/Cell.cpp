@@ -71,27 +71,21 @@ void Substance_Cell::update_color(){
 
 Life_Cell::Life_Cell(char* igenome, const Matrix& rot) {
 	direction = rot;
-	int R = 0, G = 0, B = 0;
+	float R = 0, G = 0, B = 0;
 	for (int i = 0; i < 64; i++) {
 		genome[i] = igenome[i];
 		if (genome[i] == 0)
 			G++;
 		if (genome[i] >= 11 && genome[i] <= 13)
 			R++;
+		if (genome[i] == 15)
+			B++;
 	}
 	if (rand() % 3 == 0) {
-		genome[rand() % 64] = rand() % 64;
-	}
-	if (rand() % 3 == 0) {
-		genome[rand() % 64] = rand() % 64;
-	}
-	if (rand() % 3 == 0) {
-		genome[rand() % 64] = rand() % 64;
+		genome[rand() % 64] = rand() % 16;
 	}
 
-	int summ = R + G + B;
-	float revSunn = 1 / summ;
-	col = sf::Color(R + revSunn * 96 + 100, G + revSunn * 96 + 100, B + revSunn * 96 + 100);
+	col = sf::Color(R / 64.0 * 100 + 100, G / 64.0 * 100 + 100, B / 64.0 * 100 + 100);
 }
 CELLS Life_Cell::type() {
 	return CELLS::bot;
@@ -99,10 +93,7 @@ CELLS Life_Cell::type() {
 Life_Cell::Life_Cell() {
 	direction = Matrix::get_default() * Matrix::get_rotation(90);
 	for (int i = 0; i < 64; i++) {
-		if (i % 2 == 0)
-			genome[i] = 0;
-		else
-			genome[i] = 13;
+		genome[i] = 13;
 	}
 }
 Life_Cell::~Life_Cell() {
@@ -146,6 +137,20 @@ void Life_Cell::step() {
 		}
 	}
 
+	//add minerales
+
+	Vect tmppos = position; Substance_Cell* subst;
+	for(int dx = -1; dx <= 1; dx++)
+		for (int dy = -1; dy <= 1; dy++)
+		{
+			tmppos = world->inm(position + Vect(dx, dy));
+			subst = world->map_get_world_cell(tmppos.x, tmppos.y);
+			if (subst->get_substance().mineral > 0) {
+				subst->get_substance().mineral--;
+				minerale++;
+			}
+		}
+
 COMM:
 	int command = current_command();
 
@@ -182,22 +187,12 @@ COMM:
 	}
 	// eat ( herb from world )
 	if (command >= 11 && command <= 13) {
-		int m;
-		switch (command)
-		{
-		case 11:
-			m == 1;
-			break;
-		case 12:
-			m == 0;
-			break;
-		case 13:
-			m == 7;
-			break;
-		}
-		Matrix dir = direction * rotations[m];
-		Vect pos = world->inm(position + dir * Vect::get_default());
-		int ener = world->map_get_cell(pos.x , pos.y)->eat_energy(10) * 0.8;
+		energy--;
+		return;
+	}
+	if (command == 14) {
+		energy--;
+		int ener = world->map_get_world_cell(position.x, position.y)->eat_energy(10) * 0.5;
 		if (ener != 0)
 			next_command(1);
 		else
@@ -205,14 +200,11 @@ COMM:
 		energy += ener;
 		return;
 	}
-	if (command == 14) {
-		int ener = world->map_get_world_cell(position.x, position.y)->eat_energy(10) * 0.8;
-		if (ener != 0)
-			next_command(1);
-		else
-			next_command(2);
-		energy += ener;
-		return;
+	// convertation minerales to energy
+	if (command == 15) {
+		next_command();
+		energy += minerale;
+		minerale = 0;
 	}
 	else
 		next_command();
