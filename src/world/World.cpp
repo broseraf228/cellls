@@ -1,8 +1,6 @@
 #include "World.hpp"
 #include "Cell.hpp"
 
-Matrix r45 = Matrix::get_rotation(45);
-Matrix l45 = Matrix::get_rotation(-45);
 
 World::World(int sx, int sy){
 	size = Vect(sx, sy);
@@ -39,6 +37,9 @@ Vect World::get_size() {
 std::vector<std::vector<Cell_I*>>& World::get_map() {
 	return map;
 }
+const std::vector<Life_Cell*>& World::get_bots() {
+	return bots;
+}
 int World::inmx(int p) {
 	if (p < 0)
 		return size.x + p;
@@ -70,92 +71,82 @@ void World::update_using_map() {
 Cell_I* World::map_get_cell(int x, int y) {
 	return map[x][y];
 }
+Substance_Cell* World::map_get_world_cell(int x, int y) {
+	return world[x][y];
+}
 int World::map_get_light_power(int x, int y) {
-	int res = round((size.y - y) / 10) - 1;
+	int res = round((size.y - y) / 10) - 4;
 	if (res < 0)
 		return 0;
 	return res + 8;
 }
+void World::map_add_substance(const substance& sub, int x, int y)
+{
+	world[x][y]->add(sub);
+}
 
-void World::bot_move(Life_Cell* bot){
-	Vect new_pos = inm(bot->position + bot->direction * Vect::get_default());
+void World::bot_move(Life_Cell* bot, const Vect& dir){
+	Vect new_pos = inm(bot->position + bot->direction * dir);
 	if (map_get_cell(new_pos.x, new_pos.y)->get_solid())
 		return;
+	map[bot->position.x][bot->position.y] = world[bot->position.x][bot->position.y];
 	bot->position = new_pos;	
+	map[bot->position.x][bot->position.y] = bot;
 }
-Vect World::bot_free_around_position(Life_Cell* bot) {
-	Matrix dir = bot->direction;
-	
-	Vect pos = inm(bot->position + dir * Vect::get_default());
-	for (int i = 0; i < 8; i++) {
-		if (map_get_cell(pos.x, pos.y)->get_solid()) {
-			dir = dir * r45;
-			pos = inm(bot->position + dir * Vect::get_default());
-			continue;
-		}
-		return pos;
-	}
-	return bot->position;
+void World::bot_summon(Life_Cell* bot) {
+	bots.push_back(bot);
+	map[bot->position.x][bot->position.y] = bot;
 }
 
-
+static int oo = 0;
 void World::update() {
 
 	// bot actions
-	Life_Cell* bot; int x, y; ACTION action;
+	Life_Cell* bot; int x, y;
 	for (int i = 0; i < bots.size(); i++) {
 		bot = bots[i];
 
 		bot->age++;
-		bot->energy -= bot->age * 0.5;
+		bot->energy -= 1 + bot->age * 0.005;
 
-		action = bot->think();
-		if (bot->energy > 150)
-			action = ACTION::clone;
-		if (bot->energy == 0)
-			action = ACTION::die;
-		
-		Vect tmp_pos{0};
-		switch (action)
-		{
-		case ACTION::stay:
-			break;
-		case ACTION::move:
-			bot_move(bot);
-			bot->energy -= 8;
-			break;
-		case ACTION::rotate_r:
-			bot->direction = bot->direction * r45;
-			bot->energy -= 1;
-			break;
-		case ACTION::rotate_l:
-			bot->direction = bot->direction * l45;
-			bot->energy -= 1;
-			break;
-		case ACTION::photosinthes:
-			bot->energy += map_get_light_power(bot->position.x, bot->position.y);
-			break;
-		case ACTION::clone:
-			tmp_pos = bot_free_around_position(bot);
-			if (tmp_pos == bot->position)
-			{
-				goto DIE;
-			}
-			bot->energy -= 75;
-			bots.push_back(bot->mitoze());
-			bots[bots.size() - 1]->energy = 75;
-			bots[bots.size() - 1]->position = tmp_pos;
-
-			break;
-		case ACTION::die:
-		DIE:
+		if (bot->energy <= 100) {
+			world[bot->position.x][bot->position.y]->add(substance(0, 1, 0));
+		}
+		if (bot->energy <= 0) {
 			delete bots[i];
 			bots.erase(bots.begin() + i);
-			break;
+			update_using_map();
+			continue;
 		}
 
-		update_using_map();
+		bot->step();
 	}
 
-	std::cout << "bots: " << bots.size() << std::endl;
+	// update world
+	if (oo++ % 5 == 0) 
+	{
+		for (int x = 0; x < size.x; x++) {
+			for (int y = size.y - 1; y > 1; y--) {
+				if (world[x][y - 1]->get_substance().organic >= 25 && world[x][y]->get_substance().organic < 100 && map[x][y]->type() == CELLS::sub)
+				{
+					world[x][y]->get_substance().organic += 25;
+					world[x][y - 1]->get_substance().organic -= 25;
+				}
+			}
+		}
+	}
+	for (int x = 0; x < size.x; x++) {
+		for (int y = 0; y < size.y; y++) {
+			if(world[x][y]->get_substance().organic > 50 && rand() % 3 == 0)
+				world[x][y]->get_substance().organic--;
+		}
+	}
+	update_using_map();
+
+	// update world colors;
+	for (int x = 0; x < size.x; x++) {
+		for (int y = 0; y < size.y; y++) {
+			world[x][y]->update_color();
+		}
+	}
 }
